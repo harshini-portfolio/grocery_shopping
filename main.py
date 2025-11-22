@@ -139,4 +139,58 @@ def delete_category():
     conn.commit()
     return redirect("/add_category")
 
+@app.route("/add_stores")
+def add_stores():
+    cursor.execute("select * from stores")
+    stores = cursor.fetchall()
+    print(stores)
+    return render_template("add_stores.html", stores=stores)
+
+@app.route("/add_store", methods=['post'])
+def add_store():
+    cursor.execute("select * from stores")
+    stores = cursor.fetchall()
+    print(stores)
+    return render_template("add_store.html", stores=stores)
+
+
+@app.route("/add_store_action", methods=['post'])
+def add_store_action():
+    store_name = request.form.get("store_name")
+    location = request.form.get("location")
+    count = cursor.execute("select * from stores where store_name='" + str(store_name) + "'")
+    if count > 0:
+        return render_template("message.html", message="Duplicate Details Exist")
+    cursor.execute("insert into stores(store_name,location) value('" + str(store_name)+ "','" + str(location)+ "')")
+    conn.commit()
+    return redirect("/add_stores")
+
+@app.route("/edit_store")
+def edit_store():
+    store_id = request.args.get("store_id")
+    cursor.execute("select * from stores where store_id=" + str(store_id))
+    store = cursor.fetchone()
+    return render_template("edit_store.html", store=store)
+
+@app.route("/update_store", methods=['post'])
+def update_store():
+    store_id = request.form.get("store_id")
+    store_name = request.form.get("store_name")
+    location = request.form.get("location")
+
+    cursor.execute("update stores set store_name='" + str(store_name) +
+                   "', location='" + str(location) +
+                   "' where store_id=" + str(store_id))
+    conn.commit()
+    return redirect("/add_stores")
+
+
+@app.route("/delete_store")
+def delete_store():
+    store_id = request.args.get("store_id")
+    cursor.execute("delete from stores where store_id=" + str(store_id))
+    conn.commit()
+    return redirect("/add_stores")
+
+
 app.run(debug=True)
