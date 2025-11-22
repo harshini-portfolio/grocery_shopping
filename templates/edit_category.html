@@ -1,0 +1,26 @@
+{% include 'admin_head.html' %}
+<div class="row">
+
+<div class="w-30 m-auto mt-100">
+    <div class="card p-20">
+
+        <h3 class="text-center">Edit Category</h3>
+
+        <form action="/edit_category_action" method="GET">
+
+            <input type="hidden" name="category_id" value="{{category_id}}">
+
+            <div class="form-group mt-20">
+                <input type="text" name="category_name"
+                       value="{{categories[1]}}"
+                       class="form-control p-10 bg-secondary"
+                       required>
+            </div>
+
+            <input type="submit" value="Update Category"
+                   class="btn bg-primary text-white w-80 mt-25">
+        </form>
+
+    </div>
+</div>
+</div>

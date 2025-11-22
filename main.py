@@ -387,6 +387,48 @@ def orders():
             })
 
         return render_template("orders.html", orders=orders_data, status=status)
+@app.route("/remove")
+def remove():
+    list_id = request.args.get("list_id")
+    list_item_id = request.args.get("list_item_id")
+    cursor.execute("delete from list_items where list_item_id='"+str(list_item_id)+"'")
+    conn.commit()
+    count = cursor.execute("select * from list_items where list_id='"+str(list_id)+"'")
+    if count==0:
+        cursor.execute("delete from shopping_lists where list_id='" + str(list_id) + "'")
+        conn.commit()
+    return redirect("/orders")
 
+
+@app.route("/place_order_now",methods=['post'])
+def place_order_now():
+    list_id = request.form.get("list_id")
+    price = request.form.get("price")
+    return render_template("place_order_now.html",price=price,list_id=list_id)
+
+@app.route("/place_order_now_action",methods=['post'])
+def place_order_now_action():
+    list_id = request.form.get("list_id")
+    print(list_id)
+    cursor.execute("update list_items set is_purchased='Purchased' where list_id='" + str(list_id)+ "'")
+    conn.commit()
+    cursor.execute("update shopping_lists set status='Ordered' where list_id='" + str(list_id) + "'")
+    conn.commit()
+    return render_template("message1.html",message="Order Placed")
+
+@app.route("/dispatch_order")
+def dispatch_order():
+    list_id = request.args.get("list_id")
+    cursor.execute("update shopping_lists set status='Dispatched' where list_id='" + str(list_id) + "'")
+    conn.commit()
+    return render_template("message1.html",message="Order Dispatched")
+
+
+@app.route("/mark_as_received")
+def mark_as_received():
+    list_id = request.args.get("list_id")
+    cursor.execute("update shopping_lists set status='Delivered' where list_id='" + str(list_id) + "'")
+    conn.commit()
+    return render_template("message1.html",message="Order Delivered")
 
 app.run(debug=True)
