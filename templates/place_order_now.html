@@ -1,0 +1,29 @@
+{% include 'user_head.html' %}
+<div class="row">
+
+<div class="w-30 m-auto mt-100">
+    <div class="card p-20">
+
+        <h3 class="text-center">Pay  $: {{price}}</h3>
+
+        <form action="/place_order_now_action" method="post">
+
+            <input type="hidden" name="list_id" value="{{list_id}}">
+
+            <div class="form-group mt-20">
+                <input type="text" name="cardName"class="form-control p-10 bg-secondary" placeholder="CardName" required>
+            </div>
+             <div class="form-group mt-20">
+                <input type="text" name="cardnumber"class="form-control p-10 bg-secondary" placeholder="Card Number" required>
+            </div>
+            <div class="form-group mt-20">
+                <input type="text" name="cvv"class="form-control p-10 bg-secondary" placeholder="Cvv" required>
+            </div>
+
+            <input type="submit" value="Order"
+                   class="btn bg-primary text-white w-80 mt-25">
+        </form>
+
+    </div>
+</div>
+</div>

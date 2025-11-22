@@ -285,4 +285,108 @@ def add_to_cart():
         conn.commit()
         return render_template("message1.html",message="Added to cart")
 
+@app.route("/orders")
+def orders():
+    if session['role']=='admin':
+        status = request.args.get("status", "cart").lower()  # default to cart if not provided
+
+        status_map = {
+            'cart': 'Cart',
+            'ordered': 'Ordered',
+            'dispatched': 'Dispatched',
+            'history': 'Delivered'
+        }
+
+        db_status = status_map.get(status, 'Cart')  # fallback to Cart
+
+
+        # Get shopping lists along with username
+        cursor.execute("""
+                    SELECT sl.list_id, sl.created_at, s.store_name, u.username,sl.status
+                    FROM Shopping_lists sl
+                    JOIN stores s ON sl.store_id = s.store_id
+                    JOIN users u ON sl.user_id = u.user_id
+                    WHERE  sl.status = %s
+                """, (db_status))
+        orders = cursor.fetchall()
+
+        orders_data = []
+        for order in orders:
+            list_id, created_at, store_name, username, status = order
+
+            # Get items for this shopping list
+            cursor.execute("""
+                        SELECT i.item_name, i.price, li.quantity, (i.price * li.quantity) as total_price, li.is_purchased,li.list_item_id
+                        FROM list_items li
+                        JOIN items i ON li.item_id = i.item_id
+                        WHERE li.list_id = %s
+                    """, (list_id,))
+            items = cursor.fetchall()
+
+            grand_total = sum(float(item[3]) for item in items)
+
+            orders_data.append({
+                'list_id': list_id,
+                'created_at': created_at,
+                'store_name': store_name,
+                'username': username,  # now comes from DB
+                'items': items,
+                'grand_total': grand_total,
+                "status": status
+            })
+
+        return render_template("orders.html", orders=orders_data, status=status)
+
+    elif session['role']=='user':
+        status = request.args.get("status", "cart").lower()  # default to cart if not provided
+
+        status_map = {
+            'cart': 'Cart',
+            'ordered': 'Ordered',
+            'dispatched': 'Dispatched',
+            'history': 'Delivered'
+        }
+
+        db_status = status_map.get(status, 'Cart')  # fallback to Cart
+
+        user_id = session['user_id']
+
+        # Get shopping lists along with username
+        cursor.execute("""
+            SELECT sl.list_id, sl.created_at, s.store_name, u.username,sl.status
+            FROM Shopping_lists sl
+            JOIN stores s ON sl.store_id = s.store_id
+            JOIN users u ON sl.user_id = u.user_id
+            WHERE sl.user_id = %s AND sl.status = %s
+        """, (user_id, db_status))
+        orders = cursor.fetchall()
+
+        orders_data = []
+        for order in orders:
+            list_id, created_at, store_name, username,status = order
+
+            # Get items for this shopping list
+            cursor.execute("""
+                SELECT i.item_name, i.price, li.quantity, (i.price * li.quantity) as total_price, li.is_purchased,li.list_item_id
+                FROM list_items li
+                JOIN items i ON li.item_id = i.item_id
+                WHERE li.list_id = %s
+            """, (list_id,))
+            items = cursor.fetchall()
+
+            grand_total = sum(float(item[3]) for item in items)
+
+            orders_data.append({
+                'list_id': list_id,
+                'created_at': created_at,
+                'store_name': store_name,
+                'username': username,  # now comes from DB
+                'items': items,
+                'grand_total': grand_total,
+                "status":status
+            })
+
+        return render_template("orders.html", orders=orders_data, status=status)
+
+
 app.run(debug=True)
