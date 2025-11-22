@@ -98,4 +98,45 @@ def category_item_count():
 
     return jsonify(result)
 
+@app.route("/add_category")
+def add_category():
+    cursor.execute("select * from categories")
+    categories = cursor.fetchall()
+    return render_template("add_category.html", categories=categories)
+
+
+@app.route("/add_category_action", methods=['POST'])
+def add_category_action():
+    category_name = request.form.get("category_name")
+    count = cursor.execute("select * from categories where category_name='" + str(category_name) + "'")
+    if count > 0:
+        return redirect("/add_category")
+
+    cursor.execute("insert into categories(category_name) value('" + str(category_name)+ "')")
+    conn.commit()
+    return redirect("/add_category")
+
+@app.route("/edit_category")
+def edit_category():
+    category_id = request.args.get("category_id")
+    cursor.execute("select*from categories where category_id='" + str(category_id) + "'")
+    categories = cursor.fetchall()
+    return render_template("edit_category.html",categories=categories[0],category_id=category_id)
+
+@app.route("/edit_category_action")
+def edit_category_action():
+    category_id = request.args.get("category_id")
+    category_name = request.args.get("category_name")
+    cursor.execute("update categories set category_name='" + str(category_name) + "' where category_id='" + str(category_id) + "'")
+    conn.commit()
+    return redirect("/add_category")
+
+
+@app.route("/delete_category")
+def delete_category():
+    category_id = request.args.get("category_id")
+    cursor.execute("delete from categories where category_id='" + str(category_id) + "'")
+    conn.commit()
+    return redirect("/add_category")
+
 app.run(debug=True)
