@@ -1,0 +1,31 @@
+{% include "admin_head.html" %}
+<h2>Category-wise Item Count</h2>
+<canvas id="categoryChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch("/category_item_count")
+    .then(response => response.json())
+    .then(data => {
+        const ctx = document.getElementById("categoryChart").getContext("2d");
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Items Count",
+                    data: data.counts,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
