@@ -79,4 +79,23 @@ def user_registration_action():
         conn.commit()
         return render_template("message.html", message="User Registered Successfully")
 
+
+@app.route("/category_item_count")
+def category_item_count():
+    cursor.execute("""
+        SELECT c.category_name, COUNT(i.item_id) 
+        FROM categories c
+        LEFT JOIN items i ON c.category_id = i.category_id
+        GROUP BY c.category_id
+    """)
+
+    data = cursor.fetchall()
+
+    result = {
+        "labels": [row[0] for row in data],
+        "counts": [row[1] for row in data]
+    }
+
+    return jsonify(result)
+
 app.run(debug=True)
