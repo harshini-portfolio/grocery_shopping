@@ -256,4 +256,33 @@ def delete_item():
     conn.commit()
     return redirect("/add_item")
 
+@app.route("/add_to_cart",methods=['post'])
+def add_to_cart():
+    store_id = request.form.get("store_id")
+    item_id= request.form.get("item_id")
+    quantity = request.form.get("quantity")
+    count = cursor.execute("select * from Shopping_lists where store_id='"+str(store_id)+"' and user_id='"+str(session['user_id'])+"' and status='Cart'")
+    if count>0:
+        Shopping_lists =cursor.fetchone()
+        list_id = Shopping_lists[0]
+    else:
+        cursor.execute("insert into Shopping_lists(store_id,user_id,status,created_at) values ('"+str(store_id)+"','"+str(session['user_id'])+"','Cart','"+str(datetime.now())+"')")
+        conn.commit()
+        list_id = cursor.lastrowid
+    count2 = cursor.execute("select * from list_items where list_id='"+str(list_id)+"' and item_id='"+str(item_id)+"'")
+    if count2>0:
+        existing_item = cursor.fetchone()
+        new_quantity = int(existing_item[1]) + int(quantity)  # Assuming quantity is in column index 1
+        cursor.execute(
+            "update list_items set quantity='" + str(new_quantity) + "' where list_item_id='" + str(
+                existing_item[0]) + "'"
+        )
+        conn.commit()
+        return render_template("message1.html", message="Updated to cart")
+
+    else:
+        cursor.execute("insert into list_items(list_id,item_id,quantity,is_purchased) values ('"+str(list_id)+"','"+str(item_id)+"','"+str(quantity)+"','No')")
+        conn.commit()
+        return render_template("message1.html",message="Added to cart")
+
 app.run(debug=True)
