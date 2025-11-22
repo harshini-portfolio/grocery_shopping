@@ -1,0 +1,85 @@
+{% if session['role']== "admin" %}
+    {% include 'admin_head.html' %}
+{% elif session['role']== "user" %}
+    {% include 'user_head.html' %}
+{% endif %}
+
+{% if session['role']== "admin" %}
+<div class="row">
+    <div class="w-20 mt-50">
+        <div class="mt-30">
+            <div class="row">
+                <div class="w-15 p-10"></div>
+                <div class="w-70 p-10">
+                    <form action="/add_items">
+                        <input type="hidden" name="store_id" value="{{store_id}}">
+                        <input type="submit" value="Add Items" class="btn bg-primary text-white p-10 mt-25 w-80">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="w-10"></div>
+</div>
+
+<div class="row">
+    <div class="w-10"></div>
+
+    {% for item in items %}
+    {% set category = get_category_by_category_id(item[3]) %}
+    <div class="w-15 p-5 text-center">
+       <div class="card mt-10 p-10">
+           <div><b>Item Name</b> <br>{{ item[1] }}</div><br>
+           <div><b>Price</b> <br>{{ item[2] }}</div><br>
+           <div><b>Category</b> <br>{{ category[1] }}</div><br>
+
+           <!-- Edit Button -->
+           <a href="/edit_item?item_id={{item[0]}}"
+              class="btn bg-warning text-white p-5 mt-5 w-70">
+              Edit
+           </a>
+
+           <!-- Delete Button -->
+           <a href="/delete_item?item_id={{item[0]}}"
+              onclick="return confirm('Are you sure you want to delete this item?');"
+              class="btn bg-danger text-white p-5 mt-5 w-70">
+              Delete
+           </a>
+       </div>
+    </div>
+    {% endfor %}
+</div>
+{% else%}
+<div class="row">
+    <div class="w-20 mt-50">
+        <div class="mt-30">
+
+        </div>
+    </div>
+    <div class="w-10"></div>
+</div>
+
+<div class="row">
+    <div class="w-10"></div>
+
+    {% for item in items %}
+    {% set category = get_category_by_category_id(item[3]) %}
+    <div class="w-15 p-5 text-center">
+       <div class="card mt-10 p-10">
+           <div><b>Item Name</b> <br>{{ item[1] }}</div><br>
+           <div><b>Price</b> <br>{{ item[2] }}</div><br>
+           <div><b>Category</b> <br>{{ category[1] }}</div><br>
+
+           <!-- Edit Button -->
+          <form action="add_to_cart" method="post">
+              <input type="hidden" name="store_id" value="{{item[4]}}">
+              <input type="hidden" name="item_id" value="{{item[0]}}">
+              <input type="number" name="quantity" placeholder="Enter Quantity" class="form-control p-5 bg-secondary"  min="1">
+              <input type="submit" class="btn bg-primary text-white p-5 mt-15 w-70" value="Add To Cart">
+          </form>
+       </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif%}
+

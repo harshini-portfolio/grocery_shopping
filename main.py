@@ -192,5 +192,68 @@ def delete_store():
     conn.commit()
     return redirect("/add_stores")
 
+@app.route("/add_item")
+def add_item():
+    store_id = request.args.get("store_id")
+    cursor.execute("select * from categories")
+    categories = cursor.fetchall()
+    cursor.execute("select * from items")
+    items = cursor.fetchall()
+    print(items)
+    return render_template("/add_item.html",store_id=store_id,categories=categories,items=items,get_category_by_category_id=get_category_by_category_id)
+
+@app.route("/add_items")
+def add_items():
+    store_id = request.args.get("store_id")
+    cursor.execute("select * from categories")
+    categories = cursor.fetchall()
+    return render_template("/add_items.html",store_id=store_id,categories=categories)
+
+@app.route("/add_items_action", methods=['post'])
+def add_items_action():
+    price = request.form.get("price")
+    item_name = request.form.get("item_name")
+    category_id = request.form.get("category_id")
+    store_id = request.form.get("store_id")
+    count = cursor.execute("select * from items where item_name='" + str(item_name) + "'")
+    if count > 0:
+        return render_template("message.html", message="Duplicate Details Exist")
+    cursor.execute("insert into items(item_name,price,category_id,store_id) value('" + str(item_name) + "','" + str(price) + "','" + str(category_id) + "','" + str(store_id) + "')")
+    conn.commit()
+    return redirect("/add_item")
+
+@app.route("/edit_item")
+def edit_item():
+    item_id = request.args.get("item_id")
+    cursor.execute("select * from items where item_id=" + str(item_id))
+    item = cursor.fetchone()
+
+    cursor.execute("select * from categories")
+    categories = cursor.fetchall()
+
+    return render_template("edit_item.html", item=item, categories=categories)
+
+@app.route("/update_item", methods=['post'])
+def update_item():
+    item_id = request.form.get("item_id")
+    category_id = request.form.get("category_id")
+    item_name = request.form.get("item_name")
+    price = request.form.get("price")
+    store_id = request.form.get("store_id")
+
+    cursor.execute("update items set item_name='" + str(item_name) +
+                   "', price='" + str(price) +
+                   "', category_id='" + str(category_id) +
+                   "' where item_id=" + str(item_id))
+    conn.commit()
+
+    return redirect("/add_item?store_id=" + str(store_id))
+
+@app.route("/delete_item")
+def delete_item():
+    item_id = request.args.get("item_id")
+    cursor.execute("delete from items where item_id=" + str(item_id))
+    conn.commit()
+    return redirect("/add_item")
 
 app.run(debug=True)

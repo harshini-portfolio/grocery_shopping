@@ -1,0 +1,47 @@
+{% include 'admin_head.html' %}
+
+<div class="row">
+    <div class="w-30"></div>
+    <div class="w-30 mt-100">
+        <div class="card mt-100">
+            <div class="row">
+                <div class="w-15 p-10"></div>
+                <div class="w-70 p-10">
+                    <div class="text-center mt-20 h5">Edit Item</div>
+
+                    <form action="/update_item" method="POST">
+                        <input type="hidden" name="item_id" value="{{ item[0] }}">
+                        <input type="hidden" name="store_id" value="{{ item[4] }}">
+
+                        <div class="form-group mt-10">
+                            <label>Select Category</label>
+                            <select name="category_id" class="form-control" required>
+                                {% for category in categories %}
+                                <option value="{{category[0]}}"
+                                    {% if category[0] == item[3] %} selected {% endif %}>
+                                    {{ category[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group mt-25">
+                            <input type="text" name="item_name" class="form-control p-10 bg-secondary"
+                                   value="{{ item[1] }}" required>
+                        </div>
+
+                        <div class="form-group mt-25">
+                            <input type="number" name="price" class="form-control p-10 bg-secondary"
+                                   value="{{ item[2] }}" required>
+                        </div>
+
+                        <input type="submit" value="Update Item"
+                               class="btn bg-primary text-white p-10 mt-25 w-80">
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="w-10"></div>
+</div>
